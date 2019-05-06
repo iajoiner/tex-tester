@@ -1,14 +1,19 @@
+# tex_tester 1.0
+# Author: Ying Zhou
 import subprocess
 import os
 import re
 ALL_ENGINES = ['tex','latex','pdftex','pdflatex','xetex','xelatex','luatex','lualatex']
 ENGINES_USING_LATEX = ['latex','pdflatex','xelatex','lualatex']
 USES_LATEX = {'tex': False,'latex': True, 'pdftex': False, 'pdflatex': True, 'xetex': False, 'xelatex': True, 'luatex': False, 'lualatex': True}
-def test_default(tex_string, tex_engine = 'latex'):
+def test_default(tex_string, tex_engine = 'latex', latex_packages = []):
     if tex_engine not in USES_LATEX or not USES_LATEX[tex_engine]:
         return '\\relax ' + tex_string + '\\bye'
     else:
-        return '\\documentclass{article}\\begin{document}' + tex_string + '\\end{document}'
+        package_line = ''
+        for package in latex_packages:
+            package_line = package_line + '\\usepackage{' + package + '}'
+        return '\\documentclass{article}' + package_line + '\\begin{document}' + tex_string + '\\end{document}'
 def process(tex_string, mode = 0):
     if mode == 0:#Text
         return tex_string
@@ -21,7 +26,7 @@ def process(tex_string, mode = 0):
     else:
         print(f'Unknown mode: {mode}')
         return tex_string
-def run_test(tex_string, tex_engine = 'latex', test_mode = False):
+def run_test(tex_string, tex_engine = 'latex', latex_packages = [], test_mode = False):
     accent_pattern = re.compile(r'\\[`\'^~"Hrvut=.bcdk]$|\\vec$')
     is_accent = False
     if not test_mode:
@@ -32,7 +37,7 @@ def run_test(tex_string, tex_engine = 'latex', test_mode = False):
     for i in range(4):
         if i >= 2 and not is_accent:
             break
-        completed_tex_string = test_default(process(tex_string, i), tex_engine)
+        completed_tex_string = test_default(process(tex_string, i), tex_engine, latex_packages)
         if test_mode:
             filename = 'TEX_TESTING' + '_' + tex_engine + str(i) 
             with open(filename + '.tex', 'w') as f:
@@ -47,12 +52,14 @@ def run_test(tex_string, tex_engine = 'latex', test_mode = False):
             return_codes[i] = False 
         else:
             return_codes[i] = True
+    if not any(return_codes):
+        print(f'Warning: {tex_string} is invalid using engine {tex_engine}!')
     return return_codes
-def run_multiple_engine_test(tex_string, tex_engines = ALL_ENGINES, test_mode = False):
+def run_multiple_engine_test(tex_string, tex_engines = ALL_ENGINES, latex_packages = [], test_mode = False):
     return_codes = {}
     for engine in tex_engines:
-        return_codes[engine] = run_test(tex_string, engine, test_mode)
+        return_codes[engine] = run_test(tex_string, engine, latex_packages, test_mode)
     return return_codes
         
-print(run_multiple_engine_test('\\~'))
+print(run_multiple_engine_test('\\textGamma',latex_packages = ['textgreek'], test_mode = True))
 #print(run_test(test_multipl('\\ell', )))
