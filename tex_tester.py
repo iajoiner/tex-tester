@@ -27,7 +27,7 @@ def process(tex_string, mode = 0):
         print(f'Unknown mode: {mode}')
         return tex_string
 def run_test(tex_string, tex_engine = 'latex', latex_packages = [], test_mode = False):
-    accent_pattern = re.compile(r'\\[`\'^~"Hrvut=.bcdk]$|\\vec$')
+    accent_pattern = re.compile(r'\\[`\'^~"Hrvut=.bcdk]$|\\vec$|\\widetilde$|\\widehat$')
     is_accent = False
     if not test_mode:
         filename = 'TEX_TESTING'
@@ -78,5 +78,5 @@ def run_multiple_engine_test(tex_string, tex_engines = ALL_ENGINES, latex_packag
             return_codes[engine] = run_test(tex_string, tex_engine = engine, test_mode = test_mode)
     return return_codes
         
-#åprint(run_multiple_engine_test('\\mathcal{A}', test_mode = False))
+#print(run_multiple_engine_test('\\big\/', test_mode = False))
 #print(run_test(test_multipl('\\ell', )))
